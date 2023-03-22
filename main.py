@@ -32,8 +32,8 @@ if __name__ == '__main__':
 
     print(dataset.__dict__)
 
-    # dataset.to_csv(opt.csv_output)
+    dataset.to_csv(opt.csv_output)
 
-    dataset.sprate_labels(opt.output)
+    # dataset.sprate_labels(opt.output)
 
     # dataset.change_label_to_index(opt.output)

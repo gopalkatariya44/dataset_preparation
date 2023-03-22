@@ -23,6 +23,20 @@ def convert_cor_to_yolo_txt(label, x_min, y_min, x_max, y_max, image):
     return f"{label} {x} {y} {w} {h}\n"
 
 
+def check_yolo_txt_format(file):
+    for line in file:
+        line = line.strip().split()
+        if len(line) != 5:
+            return False
+        try:
+            float_list = [float(x) for x in line[1:]]
+            if any(val < 0 or val > 1 for val in float_list):
+                return False
+        except ValueError:
+            return False
+    return True
+
+
 class Dataset:
     def __init__(self, labels_path: str = None, images_path: str = None, classes_path: str = None):
         """
@@ -85,6 +99,7 @@ class Dataset:
                             f"{prefix}.png" == image or
                             f"{prefix}.jpeg" == image):
                         file_dict[prefix] = [image, txt]
+            print("[INFO]: similar image done.")
             return file_dict
         except Exception as e:
             print(e)
@@ -119,6 +134,7 @@ class Dataset:
                         f"{label_index}": classes_list[label_index]
                     })
                 dataset_list.append(dataset_schema.as_dict())
+            print("[INFO]: dataset to list done.")
             return dataset_list
         except Exception as e:
             print(e)
@@ -131,6 +147,10 @@ class Dataset:
             for i in final_dict:
                 with open(f"{self.labels_path}/{final_dict[i][-1]}", 'r') as f:
                     lines = f.readlines()
+                    if not check_yolo_txt_format(f):
+                        print("[INFO]: There is some error in below file....")
+                        print(f"[INFO]: {self.labels_path}/{final_dict[i][-1]}")
+                        continue
                 if len(lines) == 0:
                     # print("no annotations available..")
                     os.makedirs(f"{output_path}/raw_images", exist_ok=True)
@@ -163,6 +183,7 @@ class Dataset:
                         # copy image
                         if not os.path.exists(image):
                             shutil.copy(self.images_path + '/' + final_dict[i][0], image)
+            print("[INFO]: sprate labels done.")
 
         except Exception as e:
             print(e)
